@@ -1,6 +1,7 @@
 # FL_AoR
 
-env: tensorflow 1.15
+env: tensorflow-federated 
 
-generate non-iid first in "data" file, then run "main".
-"result" folder shows related figures.
+main is modified from "https://www.tensorflow.org/federated/tutorials/building_your_own_federated_learning_algorithm"
+
+FedAvg 

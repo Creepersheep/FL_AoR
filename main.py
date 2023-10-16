@@ -1,29 +1,22 @@
-from multiprocessing import Process, Pool
+import collections
 import itertools
 import pickle
-import var
-import collections
-import shelve
 import time
-import sys
-import math
-from matplotlib import pyplot as plt
-import random
-import tensorflow_federated as tff
-from collections import *
-import tensorflow as tf
-import numpy as np
+from pathlib import Path
 
 import nest_asyncio
-from pathlib import Path
-from tempfile import TemporaryFile
+import numpy as np
+import tensorflow as tf
+import tensorflow_federated as tff
+
+import var
 
 nest_asyncio.apply()
 
 # import data_store
 # from var import *
 physical_devices = tf.config.list_physical_devices('GPU')
-tf.config.set_visible_devices(physical_devices[1:],'GPU')
+tf.config.set_visible_devices(physical_devices[1:], 'GPU')
 model = 'cifar10'
 mnist = tf.keras.datasets.mnist
 cifar10 = tf.keras.datasets.cifar10
@@ -68,7 +61,7 @@ def nonIIDGen(beta=1):
                            len(idx_k)).astype(int)[:-1]
             # logger.info('proportions4: ', proportions)
             idx_batch = [idx_j + idx.tolist() for idx_j,
-                                                  idx in zip(idx_batch, np.split(idx_k, proportions))]
+            idx in zip(idx_batch, np.split(idx_k, proportions))]
             min_size = min([len(idx_j) for idx_j in idx_batch])
 
     net_dataidx_map = {}  # data map
@@ -108,11 +101,6 @@ def make_federated_data(client_data, client_label, tnt, seednumber=1):
         batchSize, batchCount = var.batchSizeTrain, var.batchCountTrain
     elif tnt == 'test':
         batchSize, batchCount = var.batchSizeTest, var.batchCountTest
-    # for x in range(n_parties):
-    #     dataset1=tf.data.Dataset.from_tensor_slices({'pixels':client_data[x], 'label':client_label[x]})
-    #     # dataset2 = preprocess(dataset1)
-    #     # temp_list.append(dataset2)
-    #     temp_list.append(preprocess(dataset1,batchSize,batchCount))
     temp_list = [preprocess(
         tf.data.Dataset.from_tensor_slices(
             {'pixels': client_data[i], 'label': client_label[i]}),
@@ -121,39 +109,16 @@ def make_federated_data(client_data, client_label, tnt, seednumber=1):
     return temp_list
 
 
-# print('preparing FL training data')
-# federated_train_data = make_federated_data(x_train, y_train,'train',seednumber=1)
 
 
 print('preparing FL testing data')
 federated_test_data = make_federated_data(x_test_list, y_test_list, 'test')
 
 
-# cpu_device = tf.config.list_logical_devices('CPU')[0]
-# gpu_device = tf.config.list_logical_devices('GPU')
-# tff.backends.native.set_local_python_execution_context(server_tf_device=cpu_device,
-#     client_tf_devices=cpu_device,
-#     #clients_per_thread=1,
-#     max_fanout=100)
-# tff.backends.native.set_local_python_execution_context(
-#     client_tf_devices=gpu_device,
-#     #clients_per_thread=1,
-#     max_fanout=100)
-
 
 def create_keras_model():
     if model == 'cifar10':
         structure = tf.keras.models.Sequential([
-            # tf.keras.layers.InputLayer(input_shape=[28,28,1]),   #
-            # tf.keras.layers.InputLayer(input_shape=[32, 32, 3]),
-            # tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), padding='same', activation='relu'),
-            # tf.keras.layers.MaxPooling2D(),
-            # tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu'),
-            # tf.keras.layers.MaxPooling2D(),
-            # tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu'),
-            # tf.keras.layers.Flatten(),
-            # tf.keras.layers.Dense(units=256, activation='relu'),
-            # tf.keras.layers.Dense(units=10, activation='softmax')
 
             tf.keras.layers.InputLayer(input_shape=[32, 32, 3]),
             tf.keras.layers.Conv2D(filters=32, kernel_size=(
@@ -198,17 +163,6 @@ def model_fn():
         loss=tf.keras.losses.SparseCategoricalCrossentropy(),
         metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
-
-# for i in range(int(1/var.lr)):
-#     iteratives.append(tff.learning.build_federated_averaging_process(
-#     model_fn,
-#     client_optimizer_fn=lambda: tf.keras.optimizers.SGD(learning_rate=min(1,var.lr*(i+1))),
-#     server_optimizer_fn=lambda: tf.keras.optimizers.SGD(learning_rate=1),
-#     # client_optimizer_fn=lambda: tf.keras.optimizers.Adam(learning_rate=min(1, var.lr * (i + 1))),
-#     # server_optimizer_fn=lambda: tf.keras.optimizers.Adam(learning_rate=1),
-#     use_experimental_simulation_loop=True))
-# iterative=
-# iterative=iteratives[0]
 
 evaluation = tff.learning.build_federated_evaluation(
     model_fn, use_experimental_simulation_loop=True)
@@ -323,53 +277,53 @@ def fedAor(state, federated_train_data, one, clientTier, iteratives):
 
 # grid initialization
 grid = []
-methods_with_repetion = ['aog']
+methods_with_repetion = ['aor']
 methods_without_repetion = ['avg']
 utiers = [0, 1, 2, 3]
 
 # # compare differnt methods in iid
-# grid.append({
-#     'betaValues': [10],
-#     'tierTimes': var.tierTimes[:2],
-#     'utiers': [0, 1],
-#     'methods': methods_with_repetion,
-#     'model': [model]
-# })
+grid.append({
+    'betaValues': [10],
+    'tierTimes': var.tierTimes[:2],
+    'utiers': [0, 1],
+    'methods': methods_with_repetion,
+    'model': [model]
+})
 
-# # impact of non-iid
-# grid.append({
-#     'betaValues': [0.1, 1, 10],
-#     'tierTimes': var.tierTimes[:2],
-#     'utiers': [0, 1],
-#     'methods': methods_with_repetion,
-#     'model': [model]
-# })
+# impact of non-iid
+grid.append({
+    'betaValues': [0.1, 1, 10],
+    'tierTimes': var.tierTimes[:2],
+    'utiers': [0, 1],
+    'methods': methods_with_repetion,
+    'model': [model]
+})
 
 # imact of tier time
 grid.append({
     'betaValues': [0.1, 1],
-    'tierTimes': [10,20,60]  ,
+    'tierTimes': [10, 20, 60],
     'utiers': [0],
     'methods': methods_with_repetion,
     'model': [model]
 })
 
 # # fedavg on non-IID
-# grid.append({
-#     'betaValues': [0.1, 1],
-#     'methods': methods_without_repetion,
-#     'model': [model]
-# })
+grid.append({
+    'betaValues': [0.1, 1],
+    'methods': methods_without_repetion,
+    'model': [model]
+})
 
-# # impact of utlized tiers
-# grid.append({
-#     'repetion':range(var.repetion),
-#     'betaValues':[0.1,10],
-#     'tierTimes':[var.tierTimes[0]],
-#     'utiers':utiers,
-#     'methods':methods_with_repetion,
-#     'model':[model]
-# })
+# impact of utlized tiers
+grid.append({
+    'repetion': range(var.repetion),
+    'betaValues': [0.1, 10],
+    'tierTimes': [var.tierTimes[0]],
+    'utiers': utiers,
+    'methods': methods_with_repetion,
+    'model': [model]
+})
 
 # imact of tier time
 
@@ -397,15 +351,9 @@ def train(one):
             server_optimizer_fn=lambda: tf.keras.optimizers.SGD(
                 learning_rate=1),
             use_experimental_simulation_loop=True))
-        if one['methods'] == 'avg' or (one['methods'] == 'aog' and one['utiers'] == 1):
+        if one['methods'] == 'avg' or (one['methods'] == 'aor' and one['utiers'] == 1):
             break
-    # for i in range(int(1 / one['lrs'])):
-    #     print(one['lrs'] * (i + 1))
-    #     iteratives.append(tff.learning.build_federated_averaging_process(
-    #         model_fn,
-    #         client_optimizer_fn=lambda: tf.keras.optimizers.SGD(learning_rate=min(1, one['lrs']* (i + 1)),momentum=one['mms']),
-    #         server_optimizer_fn=lambda: tf.keras.optimizers.SGD(learning_rate=1),
-    #         use_experimental_simulation_loop=True))
+
     iterative = iteratives[0]
     state = iterative.initialize()
 
@@ -415,45 +363,23 @@ def train(one):
 
     if one['methods'] == 'avg':
         return fedAvg(state, federated_train_data, var.clientCount, iteratives[0])
-    elif one['methods'] == 'aog':
+    elif one['methods'] == 'aor':
         clientTier, latency = var.tierGenerator(one['tierTimes'])
         return fedAor(state, federated_train_data, one, clientTier, iteratives)
 
 
-
-pathname = 'result_all_0725'
+pathname = 'result/fig5_8'
 p = Path(pathname + '/')
 p.mkdir(exist_ok=True)
 
 file_name = './' + pathname + '/' + '3kforall'
 f = open(file_name + '.txt', 'w')
-# data=[train(one) for _,one in enumerate(setting_list)]
-# with open(file_name+'.pkl', 'wb') as pk:
-#     pickle.dump(data, pk)
-#     pickle.dump(setting_list, pk)
 
-# setsize = 2
-# set10 = math.ceil(len(setting_list) / setsize)
-# for i in range(set10):
-#     print('SET' + str(i), flush=True, file=f)
-#     print('SET' + str(i))
-#
-#     print(setting_list[setsize * i:setsize * (i + 1)])
-#     data = [train(oneset) for _, oneset in enumerate(
-#         setting_list[setsize * i:setsize * (i + 1)])]
-#
-#     file_name_aux = file_name + '_' + str(i)
-#     with open(file_name_aux + '.pkl', 'wb') as pk:
-#         pickle.dump(data, pk)
-#         pickle.dump(setting_list[setsize * i:setsize * (i + 1)], pk)
-#         pk.close()
-
-
-data=[]
-actlist=[]
-seq=0
+data = []
+actlist = []
+seq = 0
 for rep in range(var.repetion):
-    latency=var.latencyGenerator()
+    latency = var.latencyGenerator()
     iteratives = []
     for i in range(int(1 / var.lr)):
         print(var.lr * (i + 1))
@@ -467,33 +393,31 @@ for rep in range(var.repetion):
     iterative = iteratives[0]
     state = iterative.initialize()
 
-    fdatas=[]
-    for _,beta in enumerate(var.betaValues):
-        print('beta'+str(beta))
+    fdatas = []
+    for _, beta in enumerate(var.betaValues):
+        print('beta' + str(beta))
         x_train_noniid, y_train_noniid = nonIIDGen(beta)
         fdatas.append(make_federated_data(
             x_train_noniid, y_train_noniid, 'train', seednumber=1))
     for ione, one in enumerate(setting_list):
-        betaindex=var.betaValues.index(one['betaValues'])
+        betaindex = var.betaValues.index(one['betaValues'])
         actlist.append(one)
-        print(one,flush=True, file=f)
+        print(one, flush=True, file=f)
         print(one)
         if one['methods'] == 'avg' and rep == 0:
             data.append(fedAvg(state, fdatas[betaindex], var.clientCount, iterative))
-        elif one['methods'] == 'aog':
-            clientTier = var.tierGenerator_latency(latency,one['tierTimes'])
+        elif one['methods'] == 'aor':
+            clientTier = var.tierGenerator_latency(latency, one['tierTimes'])
             onedata = fedAor(state, fdatas[betaindex], one, clientTier, iteratives)
             data.append(onedata)
 
-        with open(file_name +'_'+str(seq)+ '.pkl', 'wb') as pk:
+        with open(file_name + '_' + str(seq) + '.pkl', 'wb') as pk:
             pickle.dump(onedata, pk)
             pickle.dump(one, pk)
             pk.close()
-        seq=seq+1
-        
+        seq = seq + 1
 
 with open(file_name + '.pkl', 'wb') as pk:
     pickle.dump(data, pk)
     pickle.dump(actlist, pk)
     pk.close()
-
