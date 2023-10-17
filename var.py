@@ -41,7 +41,7 @@ batchCountTrain = 1
 batchSizeTest = 1000
 batchCountTest = 10
 
-lr = 0.1
+lr = 0.02
 mm = 0.0
 
 beishu = 1.5
