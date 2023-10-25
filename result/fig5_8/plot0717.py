@@ -132,11 +132,16 @@ axs[1].set(xlabel='Iterations\n(b) MNIST', ylabel='Test accuracy')
 # f5fit = math.ceil(NUM_VALID*(deadline / fedavglatency))
 # f4fit_cifar=math.ceil(20/fedavglatency*var.NUM_VALID)
 f4fit_cifar= math.ceil(NUM_VALID*(20 / fedavglatency))
+
 axs[2].plot(np.arange(NUM_VALID) *20*TEST_frequency, data[data_sl.index(dict(betaValues=1,tierTimes=20,methods='aog',utiers=0,model='cifar10'))],  label='LESSON')
 axs[2].plot(np.arange(NUM_VALID) *20*TEST_frequency, data[data_sl.index(dict(betaValues=1,tierTimes=20,methods='aog',utiers=1,model='cifar10'))], label='FedCS')
 axs[2].plot(np.arange(f4fit_cifar)*fedavglatency*TEST_frequency,data[data_sl.index(dict(betaValues=1,methods='avg',model='cifar10'))][:f4fit_cifar], label='FedAvg')
 axs[2].set(xlabel='Time (s)\n(c) CIFAR-10', ylabel='Test accuracy')
-axs[2].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+tick_positions = np.arange(0, 100002, 50000)
+tick_labels = [f"{int(val/1000)},000" for val in tick_positions]
+tick_labels[0]=0
+axs[2].set_xticks(tick_positions,tick_labels)
+# axs[2].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
 f4fit_mnist=math.ceil(20/fedavglatency*mnist_range)
 # axs[3].plot(np.arange(f4fit_mnist)*validNumTimeAvg1_mnist[1,0]*TEST_frequency,validNumAvg1_mnist[1,0:f4fit_mnist], label='FedAvg')
@@ -146,7 +151,12 @@ axs[3].plot(np.arange(mnist_range)*20*TEST_frequency, data[data_sl.index(dict(be
 axs[3].plot(np.arange(mnist_range)*20*TEST_frequency, data[data_sl.index(dict(betaValues=1,tierTimes=20,methods='aog',utiers=1,model='mnist'))][:mnist_range], label='FedCS')
 axs[3].plot(np.arange(f4fit_mnist)*fedavglatency*TEST_frequency,data[data_sl.index(dict(betaValues=1,methods='avg',model='mnist'))][:f4fit_mnist], label='FedAvg')
 axs[3].set(xlabel='Time (s)\n(d) MNIST', ylabel='Test accuracy')
-axs[3].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+tick_positions = np.arange(0, 80001, 40000)
+tick_labels = [f"{int(val/1000)},000" for val in tick_positions]
+tick_labels[0]=0
+axs[3].set_xticks(tick_positions,tick_labels)
+
+# axs[3].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 for i in range(4):
     axs[i].grid()
 axs[0].legend()
@@ -186,6 +196,9 @@ fig5.show()
 
 ## figure 5_1 different methods with different betas by time
 fig5_1, axs = plt.subplots(ncols=3,sharey=True,figsize=[sizeH,sizeV],tight_layout=True)
+tick_positions = np.arange(0, 100001, 50000)
+tick_labels = [f"{int(val/1000)},000" for val in tick_positions]
+tick_labels[0]=0
 for k,beta in enumerate(betaValues):
     for j in range(0,1):
         deadline=var.tierTimes[j]
@@ -196,6 +209,7 @@ for k,beta in enumerate(betaValues):
         axs[k].plot(np.arange(NUM_VALID)*deadline*TEST_frequency, data[data_sl.index(dict(betaValues=beta,tierTimes=deadline,methods='aog',utiers=0,model='cifar10'))], label='LESSON')
         axs[k].plot(np.arange(NUM_VALID)*deadline*TEST_frequency, data[data_sl.index(dict(betaValues=beta,tierTimes=deadline,methods='aog',utiers=1,model='cifar10'))], label='FedCS')
         axs[k].plot(np.arange(f5fit)*fedavglatency*TEST_frequency, data[data_sl.index(dict(betaValues=beta,methods='avg',model='cifar10'))][:f5fit], label='FedAvg')
+        axs[k].set_xticks(tick_positions,tick_labels)
     axs[k].grid()
     axs[k].set(xlabel='Time (s)\n(' + chr(97 + k) + ') \u03B2=' + str(beta), ylabel='Test accuracy')
 axs[0].legend()
