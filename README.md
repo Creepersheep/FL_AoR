@@ -15,7 +15,7 @@ accuracy as compared to FedCS.
 ### Semi-synchronous FL Scheduling (LESSON)
 ![LESSON_sch.jpg](fig%2FLESSON_sch.jpg)
 ### Non Independent and Identically Distribution
-The simulation of the non-iid distribution across clients is conducted using a Dirichlet distribution characterized by a parameter β. A higher value of β results in a more uniform distribution. 
+The simulation of the non-iid distribution across clients is conducted using a Dirichlet distribution characterized by a parameter β. A higher value of β results in a more even distribution among classes. 
 
 Rows represents different clients and columns indicates the portions of various data classes, differentiated by color.
 ![data_dis.jpg](fig%2Fdata_dis.jpg)
