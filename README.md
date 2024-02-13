@@ -2,19 +2,15 @@
 
 ![wfl.jpg](fig%2Fwfl.jpg)
 ### Abstract
-Federated learning (FL) is a collaborative machine learning (ML) framework particularly 1
-suited for ML models requiring numerous training samples, such as Convolutional Neural Networks 2
-(CNNs), Recurrent Neural Networks (RNNs), and Random Forest, in the context of various applica- 3
-tions, e.g., next-word prediction and eHealth. FL involves various clients participating in the training 4
-process by uploading their local models to an FL server in each global iteration. The server aggregates 5
-these local models to update a global model. The traditional FL process may encounter bottlenecks, 6
-known as the straggler problem, where slower clients delay the overall training time. This paper in- 7
-troduces the Latency awarE Semi-synchronous client Selection and mOdel aggregation for federated 8
-learNing (LESSON) method. LESSON allows clients to participate at different frequencies: faster 9
-clients contribute more frequently, thereby mitigating the straggler problem and expediting conver- 10
-gence. Moreover, LESSON provides a tunable trade-off between model accuracy and convergence 11
-rate by setting varying deadlines. Simulation results show that LESSON outperforms two baseline 12
-methods, namely FedAvg and FedCS, in terms of convergence speed and maintains higher model 13
+Federated learning (FL) is a collaborative machine learning (ML) framework particularly suited for ML models requiring numerous training samples, such as Convolutional Neural Networks
+(CNNs), Recurrent Neural Networks (RNNs), and Random Forest, in the context of various applications, e.g., next-word prediction and eHealth. FL involves various clients participating in the training
+process by uploading their local models to an FL server in each global iteration. The server aggregates
+these local models to update a global model. The traditional FL process may encounter bottlenecks,
+known as the straggler problem, where slower clients delay the overall training time. This paper introduces the Latency awarE Semi-synchronous client Selection and mOdel aggregation for federated
+learNing (LESSON) method. LESSON allows clients to participate at different frequencies: faster
+clients contribute more frequently, thereby mitigating the straggler problem and expediting convergence. Moreover, LESSON provides a tunable trade-off between model accuracy and convergence
+rate by setting varying deadlines. Simulation results show that LESSON outperforms two baseline
+methods, namely FedAvg and FedCS, in terms of convergence speed and maintains higher model
 accuracy as compared to FedCS.
 ### Semi-synchronous FL Scheduling (LESSON)
 ![LESSON_sch.jpg](fig%2FLESSON_sch.jpg)
